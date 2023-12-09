@@ -17,6 +17,7 @@ export const useFetchStock = (search) => {
     const url = URL + "all";
 
     const response = await axios(url, { headers: { "x-api-key": API_KEY } });
+    console.log(response.data);
     return response.data;
   };
 
@@ -74,6 +75,8 @@ export const useFetchStock = (search) => {
       })();
     }
   }, [search]);
+
+
 
   return { loading, stocks, error };
 };
