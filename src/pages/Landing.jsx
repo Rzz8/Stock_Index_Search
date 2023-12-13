@@ -1,82 +1,57 @@
 import { useFetchStock } from "../apis/api";
-import { AgGridReact } from "ag-grid-react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-balham.css";
-import SearchBar from "../components/SearchBar";
 import { useState } from "react";
-import StockSearchBar from "../components/StockSearchBar";
+import StockSearch from "../components/StockSearch";
 import "../App.css";
 
-// Define AgGrid table headers
-const table = {
-  columns: [
-    { headerName: "Stock", field: "symbol" },
-    { headerName: "Name", field: "name" },
-    { headerName: "Industry", field: "industry" },
-  ],
-};
-
-// Obtain current date
-const currentDate = new Date();
-const day = currentDate.getDate();
-const month = currentDate.getMonth() + 1;
-const year = currentDate.getFullYear();
-
-function Landing() {
+// The Landing page mainly includes the StockSearch component
+const Landing = () => {
+  // State to manage the search input value
   const [search, setSearch] = useState("");
+
+  // Custom hook to fetch stock data based on the search input
   const { loading, stocks, error } = useFetchStock(search);
 
-  const submitHandler = (data) => {
-    setSearch(data);
-  };
-
+  // Handler for stock search form submission
   const stockSearchHandler = (searchItem) => {
     console.log("Search item is", searchItem);
+    // Perform any additional actions based on the search item if needed
   };
 
+  // Loading state: Display a loading message while fetching data
   if (loading) {
-    return <p>loading...</p>;
+    return <p>Loading...</p>;
   }
 
+  // Error state: Display an error message and redirect after a delay (e.g., 3 seconds)
   if (error.hasError) {
-    // Display the error message and redirect after a delay (e.g., 3 seconds)
     setTimeout(() => {
       setSearch(""); // Reset search to clear the error
       window.location.href = "/"; // Redirect to the main page
     }, 3000);
 
-    return <p>Error occurs: {error.message}. Redirecting to main page...</p>;
+    return (
+      <p>
+        Error occurs: {error.message}. Redirecting to the main page...
+      </p>
+    );
   }
 
+  // Render the Landing component
   return (
     <div className="center">
+      {/* Page title */}
       <div className="title">Home | Stocks</div>
+
+      {/* Content section with stock search functionality */}
       <div className="content">
-        Select stock industry: <SearchBar onSubmit={submitHandler} />
-        Search stock with name or symbol:{" "}
-        <StockSearchBar stocks={stocks} onSubmit={stockSearchHandler} />
+        {/* Instruction for stock search */}
+        Search stock with its name, symbol, or industry
+
+        {/* StockSearch component with stocks and onSubmit handler */}
+        <StockSearch stocks={stocks} onSubmit={stockSearchHandler} />
       </div>
-      <div className="content">
-        Industry: <strong>{search}</strong>
-      </div>
-      <div className="content">
-        Showing stocks for {`${day}/${month}/${year}`}
-      </div>
-      {/* <div
-        className="ag-theme-balham"
-        style={{
-          height: "350px",
-          width: "630px",
-        }}
-      >
-        <AgGridReact
-          columnDefs={table.columns}
-          rowData={stocks}
-          pagination={true}
-        />
-      </div> */}
     </div>
   );
-}
+};
 
 export default Landing;

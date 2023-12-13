@@ -58,7 +58,7 @@ const StockChart = ({ days, closingPrices }) => {
     <div>
       {/* Dropdown for selecting the date */}
       <select onChange={handleDateChange}>
-        <option value="">Select Date</option>
+        <option value="">Select Date From</option>
         {days.map((date) => (
           <option key={date} value={date}>
             {date}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
@@ -24,14 +24,21 @@ const API_KEY = process.env.REACT_APP_API_KEY;
 const HistoryPage = () => {
   const { id } = useParams();
   const [singleStockHistory, setSingleStockHistory] = useState([]);
-  console.log(singleStockHistory);
+  const [loading, setLoading] = useState(true);
 
   const getStockHistory = async (id) => {
     const url = URL + `/history?symbol=${id}`;
 
-    const response = await axios(url, { headers: { "x-api-key": API_KEY } });
-    const stockHistory = response.data;
-    return stockHistory;
+    try {
+      const response = await axios(url, { headers: { "x-api-key": API_KEY } });
+      const stockHistory = response.data;
+      return stockHistory;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -43,20 +50,29 @@ const HistoryPage = () => {
         console.log(error);
       }
     })();
-  }, []);
+  }, [id]);
 
   const days = singleStockHistory.map((stock) => stock.timestamp);
   const closingPrices = singleStockHistory.map((stock) => stock.close);
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (singleStockHistory.length === 0) {
+    return <div>No stock history available for {id}</div>;
+  }
+
   return (
-    <div>
-      <div>Showing stocks for the </div>
+    <div className="centered-container">
+      {/* Centered title */}
+      <div style={{ textAlign: "center", fontWeight: "bold", marginTop: "40px", marginBottom: "10px" }}>
+        Showing stocks for {singleStockHistory[0].name}
+      </div>
+
       <div
         className="ag-theme-balham"
-        style={{
-          height: "350px",
-          width: "620px",
-        }}
+        style={{ width: "38%", height: "250px", margin: "auto" }}
       >
         <AgGridReact
           columnDefs={table.columns}
@@ -64,7 +80,11 @@ const HistoryPage = () => {
           pagination={true}
         />
       </div>
-      <StockChart days={days} closingPrices={closingPrices} />
+
+      {/* Narrow the StockChart component */}
+      <div style={{ width: "50%", margin: "auto" }}>
+        <StockChart days={days} closingPrices={closingPrices} />
+      </div>
     </div>
   );
 };
